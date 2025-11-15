@@ -43,6 +43,10 @@ That’s it. No build step required.
 - Zoom controls help access small countries and islands
 - Some country names are normalized for better API matching
 
+## Changelog
+
+See `CHANGELOG.md` for a history of notable changes.
+
 ## License
 
 See `LICENSE` for details.
