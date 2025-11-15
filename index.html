@@ -1,0 +1,623 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GeoMapLink - Interactive World Map</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="https://d3js.org/topojson.v3.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+        }
+
+        header {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 1.5rem 2rem;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        h1 {
+            color: #2d3748;
+            font-size: 2rem;
+            font-weight: 700;
+        }
+
+        .subtitle {
+            color: #718096;
+            font-size: 0.9rem;
+            margin-top: 0.5rem;
+        }
+
+        #map-container {
+            flex: 1;
+            position: relative;
+            background: white;
+            margin: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+        }
+
+        svg {
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+
+        .country {
+            fill: none;
+            stroke: #4a5568;
+            stroke-width: 0.5;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .country:hover {
+            fill: #667eea;
+            fill-opacity: 0.6;
+            stroke: #2d3748;
+            stroke-width: 1;
+        }
+
+        .country.active {
+            fill: #667eea;
+            fill-opacity: 0.7;
+            stroke: #2d3748;
+            stroke-width: 1.5;
+        }
+
+        .country-info-card {
+            position: absolute;
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            min-width: 280px;
+            max-width: 320px;
+            pointer-events: none;
+            opacity: 0;
+            transform: translateY(10px);
+            transition: opacity 0.3s ease, transform 0.3s ease;
+            z-index: 1000;
+        }
+
+        .country-info-card.visible {
+            opacity: 1;
+            transform: translateY(0);
+            pointer-events: auto;
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid #e2e8f0;
+        }
+
+        .flag-container {
+            width: 60px;
+            height: 40px;
+            border-radius: 4px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+            flex-shrink: 0;
+        }
+
+        .flag-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .country-name {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #2d3748;
+            line-height: 1.2;
+        }
+
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.6rem 0;
+            border-bottom: 1px solid #f7fafc;
+        }
+
+        .info-row:last-of-type {
+            border-bottom: none;
+        }
+
+        .info-label {
+            color: #718096;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+
+        .info-value {
+            color: #2d3748;
+            font-weight: 600;
+            font-size: 0.9rem;
+            text-align: right;
+        }
+
+        .learn-more-btn {
+            display: inline-block;
+            width: 100%;
+            text-align: center;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            margin-top: 1rem;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            pointer-events: auto;
+        }
+
+        .learn-more-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .controls {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            z-index: 100;
+        }
+
+        .control-btn {
+            background: white;
+            border: none;
+            width: 44px;
+            height: 44px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #4a5568;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.15);
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .control-btn:hover {
+            background: #667eea;
+            color: white;
+            transform: scale(1.05);
+        }
+
+        .control-btn:active {
+            transform: scale(0.95);
+        }
+
+        .loading {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 1.2rem;
+            color: #4a5568;
+            text-align: center;
+        }
+
+        .spinner {
+            border: 4px solid #e2e8f0;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1rem;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: #e2e8f0;
+            border: none;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 1.2rem;
+            color: #4a5568;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+        }
+
+        .country-info-card.visible .close-btn {
+            display: flex;
+        }
+
+        .close-btn:hover {
+            background: #cbd5e0;
+            transform: scale(1.1);
+        }
+
+        @media (max-width: 768px) {
+            #map-container {
+                margin: 1rem;
+            }
+
+            header {
+                padding: 1rem;
+            }
+
+            h1 {
+                font-size: 1.5rem;
+            }
+
+            .controls {
+                top: 10px;
+                right: 10px;
+            }
+
+            .control-btn {
+                width: 36px;
+                height: 36px;
+                font-size: 1.2rem;
+            }
+
+            .country-info-card {
+                min-width: 250px;
+                max-width: 280px;
+                padding: 1rem;
+            }
+
+            .country-name {
+                font-size: 1.1rem;
+            }
+        }
+
+        footer {
+            text-align: center;
+            padding: 1rem;
+            color: white;
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>🌍 GeoMapLink</h1>
+        <p class="subtitle">Explore the world - Hover or click any country to learn more</p>
+    </header>
+
+    <div id="map-container">
+        <div class="loading">
+            <div class="spinner"></div>
+            <p>Loading world map...</p>
+        </div>
+        <div class="controls">
+            <button class="control-btn" id="zoom-in" title="Zoom In">+</button>
+            <button class="control-btn" id="zoom-out" title="Zoom Out">−</button>
+            <button class="control-btn" id="reset" title="Reset View">⟲</button>
+        </div>
+        <div class="country-info-card" id="info-card">
+            <button class="close-btn" id="close-card">×</button>
+            <div class="card-header">
+                <div class="flag-container">
+                    <img id="country-flag" src="" alt="Flag">
+                </div>
+                <div class="country-name" id="country-name"></div>
+            </div>
+            <div id="country-details"></div>
+            <a href="#" target="_blank" class="learn-more-btn" id="wiki-link">Learn More on Wikipedia</a>
+        </div>
+    </div>
+
+    <footer>
+        <p>Data provided by REST Countries API • Built with D3.js</p>
+    </footer>
+
+    <script>
+        // Configuration
+        const width = 960;
+        const height = 600;
+        let currentZoom = 1;
+        let activeCountry = null;
+        const countryDataCache = {};
+        let isMobile = window.matchMedia("(max-width: 768px)").matches;
+
+        // Create SVG
+        const svg = d3.select("#map-container")
+            .append("svg")
+            .attr("viewBox", `0 0 ${width} ${height}`)
+            .attr("preserveAspectRatio", "xMidYMid meet");
+
+        const g = svg.append("g");
+
+        // Projection
+        const projection = d3.geoMercator()
+            .scale(150)
+            .translate([width / 2, height / 1.5]);
+
+        const path = d3.geoPath().projection(projection);
+
+        // Zoom behavior
+        const zoom = d3.zoom()
+            .scaleExtent([1, 8])
+            .on("zoom", (event) => {
+                g.attr("transform", event.transform);
+                currentZoom = event.transform.k;
+                
+                // Adjust stroke width based on zoom
+                g.selectAll(".country")
+                    .style("stroke-width", 0.5 / currentZoom);
+            });
+
+        svg.call(zoom);
+
+        // Control buttons
+        d3.select("#zoom-in").on("click", () => {
+            svg.transition().duration(300).call(zoom.scaleBy, 1.5);
+        });
+
+        d3.select("#zoom-out").on("click", () => {
+            svg.transition().duration(300).call(zoom.scaleBy, 0.67);
+        });
+
+        d3.select("#reset").on("click", () => {
+            svg.transition().duration(500).call(zoom.transform, d3.zoomIdentity);
+            hideInfoCard();
+        });
+
+        // Close button
+        d3.select("#close-card").on("click", () => {
+            hideInfoCard();
+        });
+
+        // Country name mapping for special cases
+        const countryNameMapping = {
+            "Israel": "Palestine",
+            "United States of America": "United States",
+            "Dem. Rep. Korea": "North Korea",
+            "Korea": "South Korea",
+            "Lao PDR": "Laos",
+            "Bosnia and Herz.": "Bosnia and Herzegovina",
+            "Dominican Rep.": "Dominican Republic",
+            "Central African Rep.": "Central African Republic",
+            "Eq. Guinea": "Equatorial Guinea",
+            "Czechia": "Czech Republic",
+            "Macedonia": "North Macedonia",
+            "Côte d'Ivoire": "Ivory Coast",
+            "Dem. Rep. Congo": "Democratic Republic of the Congo",
+            "Congo": "Republic of the Congo",
+            "S. Sudan": "South Sudan",
+            "Timor-Leste": "East Timor"
+        };
+
+        // Fetch country data from REST Countries API
+        async function fetchCountryData(countryName) {
+            // Check cache first
+            if (countryDataCache[countryName]) {
+                return countryDataCache[countryName];
+            }
+
+            try {
+                const mappedName = countryNameMapping[countryName] || countryName;
+                const response = await fetch(`https://restcountries.com/v3.1/name/${encodeURIComponent(mappedName)}?fullText=true`);
+                
+                if (!response.ok) {
+                    throw new Error('Country not found');
+                }
+
+                const data = await response.json();
+                const country = data[0];
+
+                const countryInfo = {
+                    name: country.name.common,
+                    flag: country.flags.svg || country.flags.png,
+                    population: country.population.toLocaleString(),
+                    capital: country.capital ? country.capital[0] : "N/A",
+                    wikiLink: `https://en.wikipedia.org/wiki/${encodeURIComponent(country.name.common)}`
+                };
+
+                countryDataCache[countryName] = countryInfo;
+                return countryInfo;
+            } catch (error) {
+                console.error(`Error fetching data for ${countryName}:`, error);
+                return {
+                    name: countryName,
+                    flag: '',
+                    population: "Data unavailable",
+                    capital: "Data unavailable",
+                    wikiLink: `https://en.wikipedia.org/wiki/${encodeURIComponent(countryName)}`
+                };
+            }
+        }
+
+        // Show info card
+        function showInfoCard(countryData, event) {
+            const card = document.getElementById('info-card');
+            const mapContainer = document.getElementById('map-container');
+            
+            // Update card content
+            document.getElementById('country-flag').src = countryData.flag;
+            document.getElementById('country-flag').alt = `${countryData.name} flag`;
+            document.getElementById('country-name').textContent = countryData.name;
+            
+            const detailsHTML = `
+                <div class="info-row">
+                    <span class="info-label">Capital</span>
+                    <span class="info-value">${countryData.capital}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Population</span>
+                    <span class="info-value">${countryData.population}</span>
+                </div>
+            `;
+            document.getElementById('country-details').innerHTML = detailsHTML;
+            document.getElementById('wiki-link').href = countryData.wikiLink;
+
+            // Position the card
+            const containerRect = mapContainer.getBoundingClientRect();
+            let x, y;
+
+            if (isMobile || event.type === 'click') {
+                // Center card on mobile or when clicked
+                x = (containerRect.width - card.offsetWidth) / 2;
+                y = (containerRect.height - card.offsetHeight) / 2;
+            } else {
+                // Position near cursor on desktop hover
+                x = event.clientX - containerRect.left + 20;
+                y = event.clientY - containerRect.top - card.offsetHeight / 2;
+
+                // Adjust if card goes off screen
+                if (x + card.offsetWidth > containerRect.width) {
+                    x = event.clientX - containerRect.left - card.offsetWidth - 20;
+                }
+                if (y < 10) y = 10;
+                if (y + card.offsetHeight > containerRect.height - 10) {
+                    y = containerRect.height - card.offsetHeight - 10;
+                }
+            }
+
+            card.style.left = `${x}px`;
+            card.style.top = `${y}px`;
+            
+            // Show card with animation
+            requestAnimationFrame(() => {
+                card.classList.add('visible');
+            });
+        }
+
+        // Hide info card
+        function hideInfoCard() {
+            const card = document.getElementById('info-card');
+            card.classList.remove('visible');
+            
+            if (activeCountry) {
+                d3.select(activeCountry).classed('active', false);
+                activeCountry = null;
+            }
+        }
+
+        // Handle country interaction
+        async function handleCountryInteraction(event, d) {
+            const countryName = d.properties.name;
+            const countryElement = event.currentTarget;
+
+            // If clicking the same country on mobile, hide it
+            if (isMobile && activeCountry === countryElement) {
+                hideInfoCard();
+                return;
+            }
+
+            // Remove active class from previous country
+            if (activeCountry && activeCountry !== countryElement) {
+                d3.select(activeCountry).classed('active', false);
+            }
+
+            // Set new active country
+            activeCountry = countryElement;
+            d3.select(countryElement).classed('active', true);
+
+            // Fetch and show country data
+            const countryData = await fetchCountryData(countryName);
+            showInfoCard(countryData, event);
+        }
+
+        // Load and render the map
+        async function loadMap() {
+            try {
+                // Load world map data from topojson
+                const world = await d3.json("https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json");
+                const countries = topojson.feature(world, world.objects.countries);
+
+                // Remove loading indicator
+                d3.select(".loading").remove();
+
+                // Draw countries
+                g.selectAll(".country")
+                    .data(countries.features)
+                    .enter()
+                    .append("path")
+                    .attr("class", "country")
+                    .attr("d", path)
+                    .each(function(d) {
+                        // Add country name to properties
+                        const id = d.id;
+                        const countryName = world.objects.countries.geometries
+                            .find(g => g.id === id)?.properties?.name || "Unknown";
+                        d.properties.name = countryName;
+                    })
+                    .on("click", function(event, d) {
+                        event.stopPropagation();
+                        handleCountryInteraction(event, d);
+                    })
+                    .on("mouseenter", function(event, d) {
+                        if (!isMobile) {
+                            handleCountryInteraction(event, d);
+                        }
+                    })
+                    .on("mouseleave", function(event, d) {
+                        if (!isMobile) {
+                            // Add small delay before hiding on desktop
+                            setTimeout(() => {
+                                if (!isMobile) {
+                                    hideInfoCard();
+                                }
+                            }, 100);
+                        }
+                    });
+
+                // Click outside to close on mobile
+                svg.on("click", () => {
+                    if (isMobile) {
+                        hideInfoCard();
+                    }
+                });
+
+            } catch (error) {
+                console.error("Error loading map:", error);
+                d3.select(".loading p").text("Error loading map. Please refresh the page.");
+            }
+        }
+
+        // Initialize
+        loadMap();
+
+        // Handle window resize
+        window.addEventListener('resize', () => {
+            isMobile = window.matchMedia("(max-width: 768px)").matches;
+        });
+
+        // Prevent card from closing when clicking inside it
+        document.getElementById('info-card').addEventListener('click', (e) => {
+            e.stopPropagation();
+        });
+    </script>
+</body>
+</html>
