@@ -90,17 +90,17 @@
 
         .timezone-boundary {
             fill: none;
-            stroke: #3b82f6;
-            stroke-width: 1.2;
-            opacity: 0.6;
+            stroke: #93c5fd;
+            stroke-width: 0.5;
+            opacity: 0.3;
             pointer-events: none;
         }
 
         .timezone-label {
-            fill: #2563eb;
-            font-size: 10px;
-            font-weight: 600;
-            opacity: 0.9;
+            fill: #60a5fa;
+            font-size: 9px;
+            font-weight: 500;
+            opacity: 0.5;
             pointer-events: none;
             text-anchor: middle;
         }
@@ -667,45 +667,37 @@
 
                 // Draw timezone boundaries using real-world timezone data
                 async function drawTimezoneLines(parentGroup, xOffset = 0) {
+                    const timezoneGroup = parentGroup.append("g")
+                        .attr("class", "timezone-boundaries")
+                        .attr("transform", `translate(${xOffset}, 0)`);
+
                     try {
-                        // Load timezone boundary data from a GeoJSON source
-                        const timezoneData = await d3.json("https://cdn.jsdelivr.net/npm/timezones-geojson@1.0.0/dist/timezones.geojson");
+                        // Try multiple timezone data sources
+                        let timezoneData = null;
                         
-                        const timezoneGroup = parentGroup.append("g")
-                            .attr("class", "timezone-boundaries")
-                            .attr("transform", `translate(${xOffset}, 0)`);
+                        try {
+                            // Try primary source
+                            timezoneData = await d3.json("https://raw.githubusercontent.com/evansiroky/timezone-boundary-builder/master/dist/combined.json");
+                        } catch (e) {
+                            // Fallback source
+                            timezoneData = await d3.json("https://cdn.jsdelivr.net/npm/@datahub/core@0.8.8/data/world-timezones.json");
+                        }
 
-                        // Draw each timezone boundary
-                        timezoneData.features.forEach(feature => {
-                            timezoneGroup.append("path")
-                                .datum(feature)
-                                .attr("class", "timezone-boundary")
-                                .attr("d", path);
-
-                            // Add timezone label at centroid
-                            const centroid = path.centroid(feature);
-                            if (centroid && !isNaN(centroid[0]) && !isNaN(centroid[1])) {
-                                const tzName = feature.properties.TZID || feature.properties.tzid || '';
-                                const utcOffset = feature.properties.UTC_OFFSET || feature.properties.utc_offset || '';
-                                
-                                if (utcOffset) {
-                                    timezoneGroup.append("text")
-                                        .attr("class", "timezone-label")
-                                        .attr("x", centroid[0])
-                                        .attr("y", centroid[1])
-                                        .text(utcOffset);
-                                }
-                            }
-                        });
+                        if (timezoneData && timezoneData.features) {
+                            // Draw each timezone boundary
+                            timezoneData.features.forEach(feature => {
+                                timezoneGroup.append("path")
+                                    .datum(feature)
+                                    .attr("class", "timezone-boundary")
+                                    .attr("d", path);
+                            });
+                        } else {
+                            throw new Error("No timezone data");
+                        }
                     } catch (error) {
-                        console.warn("Could not load timezone boundaries, using simplified version:", error);
-                        // Fallback to simplified version
-                        const timezoneGroup = parentGroup.append("g")
-                            .attr("class", "timezone-lines")
-                            .attr("transform", `translate(${xOffset}, 0)`);
-
-                        // Simplified timezone boundaries at major hour offsets
-                        for (let lon = -180; lon <= 180; lon += 15) {
+                        console.warn("Using simplified timezone lines:", error);
+                        // Fallback to simplified meridian-based lines
+                        for (let lon = -180; lon <= 165; lon += 15) {
                             const points = [];
                             for (let lat = -85; lat <= 85; lat += 1) {
                                 const projected = projection([lon, lat]);
@@ -721,6 +713,7 @@
                                     .attr("d", lineGenerator(points))
                                     .attr("class", "timezone-boundary");
 
+                                // Add label at top
                                 const hourOffset = lon / 15;
                                 const label = hourOffset === 0 ? 'UTC' : 
                                             hourOffset > 0 ? `UTC+${hourOffset}` : 
