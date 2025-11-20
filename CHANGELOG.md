@@ -19,8 +19,12 @@ Semantic Versioning once releases begin.
 - Timezone and latitude lines now render across all 5 map copies
 - Animated splash screen with paint splash effect and brush script "Splash" font by Robert Leuschke
 - Country name labels displayed on the map at each country's centroid
-- Flightradar24-style side panel for country information (replaces popup card)
+- Permanently visible info panel on left side for country information (replaces slide-in panel)
 - Project rebranded to "Clickmap" with new logo styling
+- Apple Weather-style widget for displaying weather conditions with gradient background, large temperature display, and icons
+- Weather condition icons (sun, moon, clouds, rain, snow, thunder, fog) based on current weather
+- Auto-detection of user's country on page load using geolocation API (ipapi.co)
+- Black-to-transparent gradient overlay at top of page for modern Flightradar24-style header
 
 ### Changed
 - Viewport: set initial page zoom to 100% (normal size)
@@ -31,8 +35,14 @@ Semantic Versioning once releases begin.
 - Ocean background: extended 5x width to cover all wrapped map copies
 - UTC timezone labels: reduced font size from 9px to 7px for better visual balance
 - Timezone handling: improved to support both IANA timezone identifiers and UTC offset calculations
-- Header: redesigned with purple gradient background and white text (Flightradar24 style)
-- UI Layout: side panel slides in from left instead of popup card, more professional layout
+- UI Layout: info panel now permanently visible on left side, map and panel side-by-side
+- Zoom controls: repositioned to left side of map container
+- Background: changed from purple gradient to dark (#1a1a1a) for modern look
+- Header: replaced solid header bar with fixed gradient overlay at top with centered logo
+- Top gradient: reduced height to 60px (half original size) with smaller logo
+- Country labels: positioned 15px lower to avoid overlap with top gradient
+- Info panel header: increased top padding to 4rem to prevent flag/country name from clashing with top gradient
+- Weather display: redesigned as tall widget (400px min-height) with large icon, temperature, and grid layout for details
 - Israel renamed to Palestine throughout the application
 - Logo font: applied "Splash" brush script font to all "Clickmap" branding
 
@@ -42,10 +52,14 @@ Semantic Versioning once releases begin.
 - Map positioning: adjusted center latitude and translation for better continent placement and Antarctica visibility
 - Map wrapping: increased coverage to eliminate gaps when scrolling horizontally
 - Geographic lines continuity: timezone and latitude lines now extend across all map copies
+- Country name visibility: moved labels down to prevent overlap with top gradient overlay
 
 ### Removed
 - Footer removed to maximize map viewing area
-- Popup card system replaced with side panel
+- Slide-in animation for info panel (now always visible)
+- Close button for info panel
+- Traditional header bar with subtitle
+- Rounded corners and margins on map/panel (full edge-to-edge design)
 
 ## 0.2.0 - 2025-11-20
 
