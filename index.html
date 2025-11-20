@@ -420,23 +420,15 @@
         // Enable infinite horizontal wrapping
         let currentTransform = d3.zoomIdentity;
 
-        // Zoom behavior with horizontal wrapping
+        // Zoom behavior - simple implementation without wrapping logic
+        // The multiple rendered maps handle the wrapping visually
         const zoom = d3.zoom()
             .scaleExtent([1, 8])
             .on("zoom", (event) => {
                 currentTransform = event.transform;
                 currentZoom = event.transform.k;
                 
-                // Calculate wrapped x position for infinite horizontal scroll
-                const worldWidth = width * currentZoom;
-                let wrappedX = ((event.transform.x % worldWidth) + worldWidth) % worldWidth;
-                
-                // If we've scrolled past the edge, wrap around
-                if (Math.abs(event.transform.x - wrappedX) > worldWidth / 2) {
-                    wrappedX = event.transform.x;
-                }
-                
-                g.attr("transform", `translate(${event.transform.x},${event.transform.y}) scale(${currentZoom})`);
+                g.attr("transform", event.transform);
                 
                 // Adjust stroke width based on zoom
                 g.selectAll(".country")
@@ -671,10 +663,16 @@
                     });
                 }
 
-                // Draw latitude lines for each map instance
-                drawLatitudeLines(g, -width);
-                drawLatitudeLines(g, 0);
-                drawLatitudeLines(g, width);
+                // Calculate the actual width needed for proper wrapping
+                // The map spans from -180 to 180 longitude
+                const leftBound = projection([-180, 0])[0];
+                const rightBound = projection([180, 0])[0];
+                const mapWidth = rightBound - leftBound;
+
+                // Draw latitude lines for multiple instances
+                for (let i = -3; i <= 3; i++) {
+                    drawLatitudeLines(g, i * mapWidth);
+                }
 
                 // Function to render countries at a given x offset for wrapping
                 function renderCountries(xOffset = 0) {
@@ -699,10 +697,10 @@
                         });
                 }
 
-                // Render the main map and duplicates for wrapping effect
-                renderCountries(-width);  // Left duplicate
-                renderCountries(0);       // Main map
-                renderCountries(width);   // Right duplicate
+                // Render multiple copies of the map for seamless wrapping
+                for (let i = -3; i <= 3; i++) {
+                    renderCountries(i * mapWidth);
+                }
 
                 // Click outside to close
                 svg.on("click", () => {
