@@ -6,7 +6,7 @@
     <title>Clickmap - Interactive World Map</title>
     <script src="https://d3js.org/d3.v7.min.js"></script>
     <script src="https://d3js.org/topojson.v3.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Bungee+Shade&family=Rubik+Spray+Paint&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Splash&display=swap" rel="stylesheet">
     <style>
         * {
             margin: 0;
@@ -451,16 +451,16 @@
 
         .splash-title {
             color: white;
-            font-size: 4.5rem;
+            font-size: 6rem;
             font-weight: 400;
             margin-top: 1rem;
-            letter-spacing: 0.05em;
+            letter-spacing: 0.02em;
             position: relative;
-            font-family: 'Rubik Spray Paint', 'Bungee Shade', cursive;
+            font-family: 'Splash', cursive;
             text-shadow: 
-                2px 2px 0px rgba(0, 0, 0, 0.3),
-                4px 4px 0px rgba(0, 0, 0, 0.2),
-                6px 6px 8px rgba(0, 0, 0, 0.15);
+                3px 3px 0px rgba(0, 0, 0, 0.3),
+                5px 5px 10px rgba(0, 0, 0, 0.2),
+                8px 8px 20px rgba(0, 0, 0, 0.15);
             animation: paintReveal 1.5s ease-out 1.2s forwards;
             background: linear-gradient(to right, 
                 transparent 0%, 
@@ -472,7 +472,8 @@
             -webkit-background-clip: text;
             background-clip: text;
             -webkit-text-fill-color: transparent;
-            filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.5));
+            filter: drop-shadow(0 0 15px rgba(255, 255, 255, 0.6));
+            text-transform: capitalize;
         }
 
         @keyframes paintReveal {
@@ -483,7 +484,7 @@
         }
 
         .splash-title::before {
-            content: 'CLICKMAP';
+            content: 'Clickmap';
             position: absolute;
             top: 0;
             left: 0;
@@ -563,7 +564,7 @@
     <div class="splash-screen" id="splash">
         <div class="splash-content">
             <div class="splash-logo">🌍</div>
-            <h1 class="splash-title">CLICKMAP</h1>
+            <h1 class="splash-title">Clickmap</h1>
             <p class="splash-subtitle">Explore the world in real-time</p>
         </div>
         <div class="paint-drip"></div>
