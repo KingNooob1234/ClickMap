@@ -6,6 +6,7 @@
     <title>Clickmap - Interactive World Map</title>
     <script src="https://d3js.org/d3.v7.min.js"></script>
     <script src="https://d3js.org/topojson.v3.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Bungee+Shade&family=Rubik+Spray+Paint&display=swap" rel="stylesheet">
     <style>
         * {
             margin: 0;
@@ -450,16 +451,16 @@
 
         .splash-title {
             color: white;
-            font-size: 4rem;
-            font-weight: 900;
+            font-size: 4.5rem;
+            font-weight: 400;
             margin-top: 1rem;
-            letter-spacing: 0.1em;
-            text-transform: uppercase;
+            letter-spacing: 0.05em;
             position: relative;
-            font-family: 'Impact', 'Arial Black', sans-serif;
+            font-family: 'Rubik Spray Paint', 'Bungee Shade', cursive;
             text-shadow: 
-                3px 3px 0px rgba(0, 0, 0, 0.2),
-                6px 6px 0px rgba(0, 0, 0, 0.1);
+                2px 2px 0px rgba(0, 0, 0, 0.3),
+                4px 4px 0px rgba(0, 0, 0, 0.2),
+                6px 6px 8px rgba(0, 0, 0, 0.15);
             animation: paintReveal 1.5s ease-out 1.2s forwards;
             background: linear-gradient(to right, 
                 transparent 0%, 
@@ -471,6 +472,7 @@
             -webkit-background-clip: text;
             background-clip: text;
             -webkit-text-fill-color: transparent;
+            filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.5));
         }
 
         @keyframes paintReveal {
