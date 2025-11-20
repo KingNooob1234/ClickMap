@@ -699,11 +699,6 @@
                 const mapWidth = rightBound - leftBound;
                 actualMapWidth = mapWidth; // Store for zoom handler
 
-                // Draw latitude lines for 3 instances (left, center, right)
-                drawLatitudeLines(g, -mapWidth);
-                drawLatitudeLines(g, 0);
-                drawLatitudeLines(g, mapWidth);
-
                 // Function to render countries at a given x offset for wrapping
                 function renderCountries(xOffset = 0) {
                     const group = g.append("g").attr("transform", `translate(${xOffset}, 0)`);
@@ -731,6 +726,11 @@
                 renderCountries(-mapWidth);
                 renderCountries(0);
                 renderCountries(mapWidth);
+
+                // Draw latitude lines AFTER countries (so they appear on top)
+                drawLatitudeLines(g, -mapWidth);
+                drawLatitudeLines(g, 0);
+                drawLatitudeLines(g, mapWidth);
 
                 // Click outside to close
                 svg.on("click", () => {
