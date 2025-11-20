@@ -9,6 +9,25 @@ Semantic Versioning once releases begin.
 
 - Planned: Versioning and release notes structure
 
+## 0.3.0 - 2025-11-20
+
+### Changed
+- Viewport: set initial page zoom to 100% (normal size)
+- SVG viewport dimensions: reduced by 3% (931.2 x 612) to provide better spacing
+- Map projection: reduced scale to 100 and adjusted vertical positioning for optimal Antarctica visibility
+- Map interaction: enabled vertical panning when zoomed in with bounds constraints to prevent panning beyond map edges
+- SVG aspect ratio: changed from "slice" to "meet" to fit height instead of width
+- Ocean background: extended 5x width to cover all wrapped map copies
+- UTC timezone labels: reduced font size from 9px to 7px for better visual balance
+
+### Fixed
+- Vertical scrolling: locked page height to 100vh with overflow hidden to prevent all scrolling
+- Vertical panning: now locked at zoom level 1, enabled only when zoomed in
+- Map positioning: adjusted center latitude and translation for better continent placement and Antarctica visibility
+
+### Removed
+- Footer removed to maximize map viewing area
+
 ## 0.2.0 - 2025-11-20
 
 ### Added
