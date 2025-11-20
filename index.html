@@ -831,15 +831,19 @@
                 renderCountries(mapWidth);
                 renderCountries(mapWidth * 2);
 
-                // Draw time zone lines AFTER countries (so they appear on top)
+                // Draw time zone lines AFTER countries (so they appear on top) - for all 5 copies
+                await drawTimezoneLines(g, -mapWidth * 2);
                 await drawTimezoneLines(g, -mapWidth);
                 await drawTimezoneLines(g, 0);
                 await drawTimezoneLines(g, mapWidth);
+                await drawTimezoneLines(g, mapWidth * 2);
 
-                // Draw latitude lines AFTER countries (so they appear on top)
+                // Draw latitude lines AFTER countries (so they appear on top) - for all 5 copies
+                drawLatitudeLines(g, -mapWidth * 2);
                 drawLatitudeLines(g, -mapWidth);
                 drawLatitudeLines(g, 0);
                 drawLatitudeLines(g, mapWidth);
+                drawLatitudeLines(g, mapWidth * 2);
 
                 // Click outside to close
                 svg.on("click", () => {
