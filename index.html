@@ -405,8 +405,8 @@
 
     <script>
         // Configuration
-        const width = 960;
-        const height = 600;
+        const width = 931.2;
+        const height = 582;
         let currentZoom = 1;
         let activeCountry = null;
         const countryDataCache = {};
@@ -431,7 +431,7 @@
         // Projection - using a wrapping projection for infinite scroll
         // Scale reduced significantly to fit everything in viewport
         const projection = d3.geoMercator()
-            .scale(106.7)
+            .scale(110)
             .translate([width / 2, height / 2.05])
             .center([0, 0]);
 
