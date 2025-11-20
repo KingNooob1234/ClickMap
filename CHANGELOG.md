@@ -13,19 +13,27 @@ Semantic Versioning once releases begin.
 
 ### Added
 - Real-time weather information for each country's capital city (condition, temperature, humidity, wind speed)
-- Current local time display for each country's capital city in the info card
+- Current local time display for each country's capital city
 - Extended map rendering from 3 to 5 copies for seamless infinite scrolling
 - Timezone and latitude lines now render across all 5 map copies
+- Animated splash screen with paint splash effect and brush script "Splash" font by Robert Leuschke
+- Country name labels displayed on the map at each country's centroid
+- Flightradar24-style side panel for country information (replaces popup card)
+- Project rebranded to "Clickmap" with new logo styling
 
 ### Changed
 - Viewport: set initial page zoom to 100% (normal size)
-- SVG viewport dimensions: reduced by 3% (931.2 x 612) to provide better spacing
+- SVG viewport dimensions: reduced width to 465.6px (half original width), height 612px
 - Map projection: reduced scale to 100 and adjusted vertical positioning for optimal Antarctica visibility
 - Map interaction: enabled vertical panning when zoomed in with bounds constraints to prevent panning beyond map edges
 - SVG aspect ratio: changed from "slice" to "meet" to fit height instead of width
 - Ocean background: extended 5x width to cover all wrapped map copies
 - UTC timezone labels: reduced font size from 9px to 7px for better visual balance
 - Timezone handling: improved to support both IANA timezone identifiers and UTC offset calculations
+- Header: redesigned with purple gradient background and white text (Flightradar24 style)
+- UI Layout: side panel slides in from left instead of popup card, more professional layout
+- Israel renamed to Palestine throughout the application
+- Logo font: applied "Splash" brush script font to all "Clickmap" branding
 
 ### Fixed
 - Vertical scrolling: locked page height to 100vh with overflow hidden to prevent all scrolling
@@ -36,6 +44,7 @@ Semantic Versioning once releases begin.
 
 ### Removed
 - Footer removed to maximize map viewing area
+- Popup card system replaced with side panel
 
 ## 0.2.0 - 2025-11-20
 
