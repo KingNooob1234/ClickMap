@@ -23,7 +23,9 @@ Semantic Versioning once releases begin.
 - Info panel now displays "City" instead of "Capital" label
 - City dropdown automatically updates all info (weather, time) when changed
 - Default view shows capital city (first city in list) for countries with major cities data
-- Map container width adjusted to accommodate new search sidebar (now calc(100% - 700px))
+- Search sidebar positioned on right side of screen for better balance
+- Layout: info panel (left), map (center), search sidebar (right)
+- Map container now flexible width between panels
 
 ## [0.3.0] - 2025-11-20
 
