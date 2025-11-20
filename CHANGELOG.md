@@ -9,9 +9,10 @@ Semantic Versioning once releases begin.
 
 - Planned: Versioning and release notes structure
 
-## 0.3.0 - 2025-11-20
+## [0.3.0] - 2025-11-20
 
 ### Added
+- Terrain-based country coloring: countries now display realistic colors based on their dominant landscape (deserts in sandy tans, rainforests in deep greens, temperate regions in light greens, Antarctica in white, etc.)
 - Real-time weather information for each country's capital city (condition, temperature, humidity, wind speed)
 - Current local time display for each country's capital city
 - Extended map rendering from 3 to 5 copies for seamless infinite scrolling

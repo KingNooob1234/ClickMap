@@ -659,6 +659,63 @@
             splash.classList.add('fade-out');
         }, 3000);
 
+        // Terrain colors for countries based on their dominant landscape
+        const terrainColors = {
+            // Desert/Arid (tan, sandy)
+            "Algeria": "#E0C9A6", "Libya": "#E5D4B5", "Egypt": "#DCC9A0", "Saudi Arabia": "#E8D5B7",
+            "Niger": "#D9C4A1", "Chad": "#DBC8A8", "Mali": "#DACA9D", "Mauritania": "#E0CAA0",
+            "Sudan": "#D4BD95", "Oman": "#E3D2B3", "Yemen": "#D9C4A0", "Jordan": "#DFC9A5",
+            "United Arab Emirates": "#E6D8C3", "Kuwait": "#E2D0B0", "Qatar": "#E4D4B8", 
+            "Bahrain": "#E0CDB5", "Iraq": "#D5BE9A", "Syria": "#DCC5A3", "Namibia": "#D8BF9C",
+            "Botswana": "#D1BA93", "Mongolia": "#D6C0A0", "Kazakhstan": "#D4BD98",
+            
+            // Tropical/Rainforest (deep green)
+            "Brazil": "#6B8E5F", "Democratic Republic of the Congo": "#5A7D52", "Congo": "#5F8457",
+            "Indonesia": "#608558", "Colombia": "#5C7F54", "Peru": "#687F58", "Venezuela": "#5F8256",
+            "Gabon": "#5A7C52", "Cameroon": "#5D7E54", "Central African Republic": "#5F8057",
+            "Ecuador": "#5C7D53", "Papua New Guinea": "#5B7D52", "Malaysia": "#5D8055",
+            "Myanmar": "#5F8358", "Thailand": "#608457", "Vietnam": "#5E8256", "Laos": "#5D7F54",
+            "Cambodia": "#5F8357", "Philippines": "#5E8155", "Nigeria": "#5C7E53",
+            
+            // Temperate/Mixed (light green)
+            "United States": "#8FA67C", "China": "#88A175", "Russia": "#8AA178", "Canada": "#85A079",
+            "Australia": "#9AAE87", "India": "#8DA47A", "Mexico": "#91A57D", "Argentina": "#8FA37C",
+            "France": "#90A57E", "Germany": "#8DA47B", "Poland": "#8BA279", "Ukraine": "#8CA37A",
+            "United Kingdom": "#8DA57C", "Italy": "#92A680", "Spain": "#94A881", "Turkey": "#8FA47D",
+            "Japan": "#87A178", "South Korea": "#89A27A", "North Korea": "#87A077",
+            
+            // Tundra/Cold (gray-green)
+            "Iceland": "#A5B5A8", "Norway": "#9BAC9F", "Sweden": "#9CAD A0", "Finland": "#9AAB9E",
+            "Greenland": "#C8D5D8", "Alaska": "#A8B8AB", "Antarctica": "#FFFFFF",
+            
+            // Mediterranean/Dry temperate (olive/tan-green)
+            "Greece": "#A5B08A", "Tunisia": "#BDB598", "Morocco": "#B8AB8F", "Portugal": "#A8B18D",
+            "Lebanon": "#B5AB90", "Palestine": "#BCB295", "Cyprus": "#B8AE92",
+            
+            // Mountainous (gray-brown)
+            "Afghanistan": "#ACA091", "Pakistan": "#A89E8D", "Nepal": "#A39889", "Bhutan": "#A59A8B",
+            "Tajikistan": "#A79D8E", "Kyrgyzstan": "#AA9F90", "Switzerland": "#9FA08E",
+            "Austria": "#A3A392", "Chile": "#A59E8F", "Bolivia": "#A89C8A",
+            
+            // Agricultural/Farmland (yellow-green)
+            "Bangladesh": "#9BB87F", "Netherlands": "#95B681", "Belgium": "#97B783", 
+            "Denmark": "#98B884", "Ireland": "#8FB67D", "New Zealand": "#8DB57B",
+            
+            // Mix/Varied
+            "South Africa": "#A0AA85", "Kenya": "#97A77E", "Tanzania": "#94A57C", 
+            "Ethiopia": "#9DA688", "Somalia": "#C5B89A", "Uganda": "#8CA279",
+            "Zimbabwe": "#A3A889", "Mozambique": "#96A57F", "Zambia": "#98A681",
+            "Angola": "#8FA47B", "Madagascar": "#8BA378", "Senegal": "#B3A889",
+            "Ghana": "#7A9168", "Ivory Coast": "#7B9269", "Burkina Faso": "#C0B090",
+            "Benin": "#8A9E76", "Togo": "#8B9F77", "Guinea": "#7C9369",
+            "Sierra Leone": "#7D946A", "Liberia": "#7E956B", "Malawi": "#91A37C",
+            "Rwanda": "#89A077", "Burundi": "#8AA178", "Eritrea": "#C2B495",
+            "Djibouti": "#D5C4A5", "South Sudan": "#B5A88B"
+        };
+
+        // Default terrain color for countries not specified
+        const defaultTerrainColor = "#A5B892";
+
         // Configuration
         const width = 465.6;
         const height = 612;
@@ -1167,6 +1224,20 @@
                         .append("path")
                         .attr("class", "country")
                         .attr("d", path)
+                        .style("fill", function(d) {
+                            // Get country name
+                            const id = d.id;
+                            let countryName = world.objects.countries.geometries
+                                .find(g => g.id === id)?.properties?.name || "Unknown";
+                            
+                            // Replace Israel with Palestine
+                            if (countryName === "Israel") {
+                                countryName = "Palestine";
+                            }
+                            
+                            // Return terrain color or default
+                            return terrainColors[countryName] || defaultTerrainColor;
+                        })
                         .each(function(d) {
                             // Add country name to properties
                             const id = d.id;
