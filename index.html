@@ -563,11 +563,31 @@
                 const data = await response.json();
                 const country = data[0];
 
+                // Get timezone and calculate local time
+                const timezone = country.timezones ? country.timezones[0] : null;
+                let localTime = "N/A";
+                
+                if (timezone) {
+                    try {
+                        const now = new Date();
+                        localTime = now.toLocaleTimeString('en-US', {
+                            timeZone: timezone,
+                            hour: '2-digit',
+                            minute: '2-digit',
+                            second: '2-digit',
+                            hour12: true
+                        });
+                    } catch (e) {
+                        console.warn(`Could not get time for timezone: ${timezone}`);
+                    }
+                }
+
                 const countryInfo = {
                     name: country.name.common,
                     flag: country.flags.svg || country.flags.png,
                     population: country.population.toLocaleString(),
                     capital: country.capital ? country.capital[0] : "N/A",
+                    localTime: localTime,
                     wikiLink: `https://en.wikipedia.org/wiki/${encodeURIComponent(country.name.common)}`
                 };
 
@@ -580,6 +600,7 @@
                     flag: '',
                     population: "Data unavailable",
                     capital: "Data unavailable",
+                    localTime: "Data unavailable",
                     wikiLink: `https://en.wikipedia.org/wiki/${encodeURIComponent(countryName)}`
                 };
             }
@@ -599,6 +620,10 @@
                 <div class="info-row">
                     <span class="info-label">Capital</span>
                     <span class="info-value">${countryData.capital}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Local Time</span>
+                    <span class="info-value">${countryData.localTime}</span>
                 </div>
                 <div class="info-row">
                     <span class="info-label">Population</span>
