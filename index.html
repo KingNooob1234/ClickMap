@@ -66,7 +66,7 @@
             overflow: hidden;
             display: flex;
             flex-direction: column;
-            width: calc(100% - 380px);
+            width: calc(100% - 700px);
         }
 
         svg {
@@ -158,6 +158,78 @@
             font-size: 5px;
         }
 
+        .search-sidebar {
+            position: relative;
+            width: 320px;
+            background: #f8f9fa;
+            box-shadow: 4px 0 20px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            border-radius: 0;
+        }
+
+        .search-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 1.5rem;
+            padding-top: 4rem;
+            color: white;
+        }
+
+        .search-title {
+            font-size: 1.2rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 0.75rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            background: white;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .search-input:focus {
+            outline: none;
+            box-shadow: 0 2px 12px rgba(102, 126, 234, 0.3);
+        }
+
+        .search-results {
+            flex: 1;
+            overflow-y: auto;
+            padding: 1rem;
+        }
+
+        .search-result-item {
+            padding: 0.75rem;
+            margin-bottom: 0.5rem;
+            background: white;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+
+        .search-result-item:hover {
+            background: #667eea;
+            color: white;
+            transform: translateX(4px);
+        }
+
+        .result-name {
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .result-type {
+            font-size: 0.75rem;
+            opacity: 0.7;
+            margin-top: 0.25rem;
+        }
+
         .info-panel {
             position: relative;
             width: 380px;
@@ -168,6 +240,35 @@
             display: flex;
             flex-direction: column;
             border-radius: 0;
+        }
+
+        .city-selector {
+            margin-bottom: 1.5rem;
+        }
+
+        .city-selector label {
+            display: block;
+            color: #718096;
+            font-size: 0.85rem;
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+        }
+
+        .city-dropdown {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            background: white;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .city-dropdown:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
         }
 
         .panel-header {
@@ -657,6 +758,17 @@
     </div>
 
     <div style="display: flex; flex: 1; overflow: hidden;">
+        <!-- Search Sidebar -->
+        <div class="search-sidebar">
+            <div class="search-header">
+                <div class="search-title">Search</div>
+                <input type="text" class="search-input" id="search-input" placeholder="Search countries or cities...">
+            </div>
+            <div class="search-results" id="search-results">
+                <div style="text-align: center; color: #718096; padding: 2rem;">Type to search...</div>
+            </div>
+        </div>
+
         <!-- Side Panel for Country Info -->
         <div class="info-panel" id="info-panel">
             <div class="panel-header">
@@ -751,6 +863,74 @@
         // Default terrain color for countries not specified
         const defaultTerrainColor = "#A5B892";
 
+        // Major cities database with coordinates
+        const majorCities = {
+            "United States": [
+                {name: "Washington D.C.", lat: 38.9072, lon: -77.0369},
+                {name: "New York", lat: 40.7128, lon: -74.0060},
+                {name: "Los Angeles", lat: 34.0522, lon: -118.2437},
+                {name: "Chicago", lat: 41.8781, lon: -87.6298},
+                {name: "Houston", lat: 29.7604, lon: -95.3698}
+            ],
+            "China": [
+                {name: "Beijing", lat: 39.9042, lon: 116.4074},
+                {name: "Shanghai", lat: 31.2304, lon: 121.4737},
+                {name: "Guangzhou", lat: 23.1291, lon: 113.2644},
+                {name: "Shenzhen", lat: 22.5431, lon: 114.0579}
+            ],
+            "India": [
+                {name: "New Delhi", lat: 28.6139, lon: 77.2090},
+                {name: "Mumbai", lat: 19.0760, lon: 72.8777},
+                {name: "Bangalore", lat: 12.9716, lon: 77.5946},
+                {name: "Kolkata", lat: 22.5726, lon: 88.3639}
+            ],
+            "United Kingdom": [
+                {name: "London", lat: 51.5074, lon: -0.1278},
+                {name: "Manchester", lat: 53.4808, lon: -2.2426},
+                {name: "Birmingham", lat: 52.4862, lon: -1.8904}
+            ],
+            "France": [
+                {name: "Paris", lat: 48.8566, lon: 2.3522},
+                {name: "Marseille", lat: 43.2965, lon: 5.3698},
+                {name: "Lyon", lat: 45.7640, lon: 4.8357}
+            ],
+            "Germany": [
+                {name: "Berlin", lat: 52.5200, lon: 13.4050},
+                {name: "Munich", lat: 48.1351, lon: 11.5820},
+                {name: "Hamburg", lat: 53.5511, lon: 9.9937}
+            ],
+            "Japan": [
+                {name: "Tokyo", lat: 35.6762, lon: 139.6503},
+                {name: "Osaka", lat: 34.6937, lon: 135.5023},
+                {name: "Kyoto", lat: 35.0116, lon: 135.7681}
+            ],
+            "Brazil": [
+                {name: "Brasília", lat: -15.8267, lon: -47.9218},
+                {name: "São Paulo", lat: -23.5505, lon: -46.6333},
+                {name: "Rio de Janeiro", lat: -22.9068, lon: -43.1729}
+            ],
+            "Australia": [
+                {name: "Canberra", lat: -35.2809, lon: 149.1300},
+                {name: "Sydney", lat: -33.8688, lon: 151.2093},
+                {name: "Melbourne", lat: -37.8136, lon: 144.9631}
+            ],
+            "Canada": [
+                {name: "Ottawa", lat: 45.4215, lon: -75.6972},
+                {name: "Toronto", lat: 43.6532, lon: -79.3832},
+                {name: "Vancouver", lat: 49.2827, lon: -123.1207}
+            ],
+            "Russia": [
+                {name: "Moscow", lat: 55.7558, lon: 37.6173},
+                {name: "Saint Petersburg", lat: 59.9343, lon: 30.3351},
+                {name: "Novosibirsk", lat: 55.0084, lon: 82.9357}
+            ],
+            "Mexico": [
+                {name: "Mexico City", lat: 19.4326, lon: -99.1332},
+                {name: "Guadalajara", lat: 20.6597, lon: -103.3496},
+                {name: "Monterrey", lat: 25.6866, lon: -100.3161}
+            ]
+        };
+
         // Configuration
         const width = 465.6;
         const height = 612;
@@ -758,6 +938,8 @@
         let activeCountry = null;
         const countryDataCache = {};
         let isMobile = window.matchMedia("(max-width: 768px)").matches;
+        let allCountriesData = [];
+        let currentSelectedCity = null;
 
         // Create SVG
         const svg = d3.select("#map-container")
@@ -1028,8 +1210,57 @@
             }
         }
 
+        // Fetch weather and time for a specific city
+        async function fetchCityData(cityName, lat, lon) {
+            let weather = null;
+            let localTime = "N/A";
+            
+            try {
+                // Fetch weather
+                const weatherResponse = await fetch(
+                    `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m,weather_code,wind_speed_10m&temperature_unit=celsius&timezone=auto`
+                );
+                
+                if (weatherResponse.ok) {
+                    const weatherData = await weatherResponse.json();
+                    const current = weatherData.current;
+                    
+                    const weatherCodeMap = {
+                        0: "Clear sky", 1: "Mainly clear", 2: "Partly cloudy", 3: "Overcast",
+                        45: "Foggy", 48: "Foggy", 51: "Light drizzle", 53: "Drizzle", 55: "Heavy drizzle",
+                        61: "Light rain", 63: "Rain", 65: "Heavy rain", 71: "Light snow", 73: "Snow", 
+                        75: "Heavy snow", 77: "Snow grains", 80: "Light showers", 81: "Showers", 
+                        82: "Heavy showers", 85: "Light snow showers", 86: "Snow showers", 
+                        95: "Thunderstorm", 96: "Thunderstorm with hail", 99: "Thunderstorm with hail"
+                    };
+                    
+                    weather = {
+                        temp: `${Math.round(current.temperature_2m)}°C`,
+                        humidity: `${current.relative_humidity_2m}%`,
+                        windSpeed: `${Math.round(current.wind_speed_10m)} km/h`,
+                        condition: weatherCodeMap[current.weather_code] || "Unknown"
+                    };
+                    
+                    // Get local time from timezone
+                    if (weatherData.timezone) {
+                        const cityDate = new Date(current.time);
+                        localTime = cityDate.toLocaleTimeString('en-US', {
+                            timeZone: weatherData.timezone,
+                            hour: '2-digit',
+                            minute: '2-digit',
+                            hour12: true
+                        });
+                    }
+                }
+            } catch (err) {
+                console.warn(`Could not fetch data for ${cityName}:`, err);
+            }
+            
+            return { weather, localTime, cityName };
+        }
+
         // Show info panel
-        function showInfoCard(countryData, event) {
+        async function showInfoCard(countryData, event, selectedCity = null) {
             const panel = document.getElementById('info-panel');
             
             // Update panel content
@@ -1037,16 +1268,59 @@
             document.getElementById('country-flag').alt = `${countryData.name} flag`;
             document.getElementById('country-name').textContent = countryData.name;
             
+            // Get cities for this country
+            const cities = majorCities[countryData.name] || [];
+            let cityDropdownHTML = '';
+            
+            if (cities.length > 0) {
+                cityDropdownHTML = `
+                    <div class="city-selector">
+                        <label for="city-dropdown">Select City:</label>
+                        <select class="city-dropdown" id="city-dropdown">
+                            ${cities.map((city, idx) => 
+                                `<option value="${idx}" ${(!selectedCity && idx === 0) || (selectedCity && city.name === selectedCity.name) ? 'selected' : ''}>${city.name}</option>`
+                            ).join('')}
+                        </select>
+                    </div>
+                `;
+            }
+            
+            // If a city is selected, fetch its data, otherwise use capital data
+            let displayData = countryData;
+            if (selectedCity) {
+                const cityData = await fetchCityData(selectedCity.name, selectedCity.lat, selectedCity.lon);
+                displayData = {
+                    ...countryData,
+                    weather: cityData.weather,
+                    localTime: cityData.localTime,
+                    capital: selectedCity.name
+                };
+                currentSelectedCity = selectedCity;
+            } else if (cities.length > 0) {
+                // Default to first city (capital)
+                const firstCity = cities[0];
+                const cityData = await fetchCityData(firstCity.name, firstCity.lat, firstCity.lon);
+                displayData = {
+                    ...countryData,
+                    weather: cityData.weather,
+                    localTime: cityData.localTime,
+                    capital: firstCity.name
+                };
+                currentSelectedCity = firstCity;
+            } else {
+                currentSelectedCity = null;
+            }
+            
             let weatherHTML = '';
-            if (countryData.weather) {
+            if (displayData.weather) {
                 // Determine weather icon based on condition
                 // Determine if it's night time based on local time
-                const timeStr = countryData.localTime;
+                const timeStr = displayData.localTime;
                 const hour = timeStr ? parseInt(timeStr.split(':')[0]) : 12;
                 const isNight = hour < 6 || hour >= 20;
                 
                 let weatherIcon = isNight ? '🌙' : '☀️'; // Default based on time
-                const condition = countryData.weather.condition.toLowerCase();
+                const condition = displayData.weather.condition.toLowerCase();
                 
                 if (condition.includes('clear')) {
                     weatherIcon = isNight ? '🌙' : '☀️';
@@ -1070,17 +1344,17 @@
                     <div class="weather-widget">
                         <div class="weather-icon">${weatherIcon}</div>
                         <div class="weather-main">
-                            <div class="weather-condition">${countryData.weather.condition}</div>
-                            <div class="weather-temp">${countryData.weather.temp.replace('°C', '°')}</div>
+                            <div class="weather-condition">${displayData.weather.condition}</div>
+                            <div class="weather-temp">${displayData.weather.temp.replace('°C', '°')}</div>
                         </div>
                         <div class="weather-details">
                             <div class="weather-detail">
                                 <span class="weather-detail-label">Humidity</span>
-                                <span class="weather-detail-value">${countryData.weather.humidity}</span>
+                                <span class="weather-detail-value">${displayData.weather.humidity}</span>
                             </div>
                             <div class="weather-detail">
                                 <span class="weather-detail-label">Wind</span>
-                                <span class="weather-detail-value">${countryData.weather.windSpeed}</span>
+                                <span class="weather-detail-value">${displayData.weather.windSpeed}</span>
                             </div>
                         </div>
                     </div>
@@ -1088,14 +1362,15 @@
             }
             
             const detailsHTML = `
+                ${cityDropdownHTML}
                 ${weatherHTML}
                 <div class="info-row">
-                    <span class="info-label">Capital</span>
-                    <span class="info-value">${countryData.capital}</span>
+                    <span class="info-label">City</span>
+                    <span class="info-value">${displayData.capital}</span>
                 </div>
                 <div class="info-row">
                     <span class="info-label">Local Time</span>
-                    <span class="info-value">${countryData.localTime}</span>
+                    <span class="info-value">${displayData.localTime}</span>
                 </div>
                 <div class="info-row">
                     <span class="info-label">Population</span>
@@ -1104,6 +1379,16 @@
             `;
             document.getElementById('country-details').innerHTML = detailsHTML;
             document.getElementById('wiki-link').href = countryData.wikiLink;
+            
+            // Add event listener to city dropdown
+            const cityDropdown = document.getElementById('city-dropdown');
+            if (cityDropdown) {
+                cityDropdown.addEventListener('change', async function() {
+                    const selectedIndex = parseInt(this.value);
+                    const selectedCity = cities[selectedIndex];
+                    await showInfoCard(countryData, event, selectedCity);
+                });
+            }
         }
 
         // Hide info card (deselect country)
@@ -1413,6 +1698,114 @@
             }
         }
 
+        // Build search index of all countries and cities
+        function buildSearchIndex() {
+            const searchIndex = [];
+            
+            // Add all countries
+            for (const countryName in terrainColors) {
+                searchIndex.push({
+                    type: 'country',
+                    name: countryName,
+                    searchText: countryName.toLowerCase()
+                });
+            }
+            
+            // Add all major cities
+            for (const countryName in majorCities) {
+                const cities = majorCities[countryName];
+                cities.forEach(city => {
+                    searchIndex.push({
+                        type: 'city',
+                        name: city.name,
+                        country: countryName,
+                        lat: city.lat,
+                        lon: city.lon,
+                        searchText: `${city.name} ${countryName}`.toLowerCase()
+                    });
+                });
+            }
+            
+            return searchIndex;
+        }
+
+        // Handle search input
+        function handleSearch(query) {
+            const searchResults = document.getElementById('search-results');
+            
+            if (!query || query.length < 2) {
+                searchResults.innerHTML = '<div style="text-align: center; color: #718096; padding: 2rem;">Type to search...</div>';
+                return;
+            }
+            
+            const searchIndex = buildSearchIndex();
+            const results = searchIndex.filter(item => 
+                item.searchText.includes(query.toLowerCase())
+            ).slice(0, 20); // Limit to 20 results
+            
+            if (results.length === 0) {
+                searchResults.innerHTML = '<div style="text-align: center; color: #718096; padding: 2rem;">No results found</div>';
+                return;
+            }
+            
+            searchResults.innerHTML = results.map(result => `
+                <div class="search-result-item" data-type="${result.type}" data-name="${result.name}" data-country="${result.country || result.name}" data-lat="${result.lat || ''}" data-lon="${result.lon || ''}">
+                    <div class="result-name">${result.name}</div>
+                    <div class="result-type">${result.type === 'country' ? 'Country' : `City in ${result.country}`}</div>
+                </div>
+            `).join('');
+            
+            // Add click handlers to results
+            document.querySelectorAll('.search-result-item').forEach(item => {
+                item.addEventListener('click', async function() {
+                    const type = this.dataset.type;
+                    const name = this.dataset.name;
+                    const country = this.dataset.country;
+                    
+                    if (type === 'country') {
+                        // Find and click the country on the map
+                        const countryPath = d3.selectAll('.country')
+                            .filter(function(d) { return d.properties.name === country; })
+                            .node();
+                        
+                        if (countryPath) {
+                            const countryData = d3.select(countryPath).datum();
+                            const event = { currentTarget: countryPath };
+                            await handleCountryInteraction(event, countryData);
+                        }
+                    } else {
+                        // City selected - load country data then select city
+                        const countryPath = d3.selectAll('.country')
+                            .filter(function(d) { return d.properties.name === country; })
+                            .node();
+                        
+                        if (countryPath) {
+                            const countryData = d3.select(countryPath).datum();
+                            const countryName = countryData.properties.name;
+                            
+                            // Get full country data
+                            const fullCountryData = await getCountryData(countryName);
+                            
+                            // Find the selected city
+                            const cities = majorCities[country] || [];
+                            const selectedCity = cities.find(c => c.name === name);
+                            
+                            if (selectedCity) {
+                                await showInfoCard(fullCountryData, { currentTarget: countryPath }, selectedCity);
+                                
+                                // Highlight country on map
+                                if (activeCountry && activeCountry !== countryPath) {
+                                    d3.select(activeCountry).classed('active', false);
+                                }
+                                d3.select(countryPath).classed('active', true);
+                                activeCountry = countryPath;
+                            }
+                        }
+                    }
+                });
+            });
+        }
+
         // Initialize
         loadMap();
 
@@ -1421,9 +1814,14 @@
             isMobile = window.matchMedia("(max-width: 768px)").matches;
         });
 
-        // Prevent card from closing when clicking inside it
-        document.getElementById('info-card').addEventListener('click', (e) => {
-            e.stopPropagation();
+        // Search input handler
+        const searchInput = document.getElementById('search-input');
+        let searchTimeout;
+        searchInput.addEventListener('input', function() {
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(() => {
+                handleSearch(this.value);
+            }, 300); // Debounce search by 300ms
         });
     </script>
 </body>

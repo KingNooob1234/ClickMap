@@ -9,6 +9,22 @@ Semantic Versioning once releases begin.
 
 - Planned: Versioning and release notes structure
 
+## [0.4.0] - 2025-11-20
+
+### Added
+- City selection dropdown: choose from major cities within each country to view specific weather and time data
+- Search sidebar: searchable list of all countries and major cities with instant filtering
+- Major cities database for 12+ countries including USA, China, India, UK, France, Germany, Japan, Brazil, Australia, Canada, Russia, and Mexico
+- Dynamic city data fetching: real-time weather and local time for any selected city
+- Search functionality with debounced input and result limiting
+- Click-to-select from search results to view country/city information
+
+### Changed
+- Info panel now displays "City" instead of "Capital" label
+- City dropdown automatically updates all info (weather, time) when changed
+- Default view shows capital city (first city in list) for countries with major cities data
+- Map container width adjusted to accommodate new search sidebar (now calc(100% - 700px))
+
 ## [0.3.0] - 2025-11-20
 
 ### Added
