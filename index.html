@@ -454,19 +454,34 @@
             }
         });
 
-        // Projection
+        // Projection - using a wrapping projection for infinite scroll
         const projection = d3.geoMercator()
             .scale(150)
-            .translate([width / 2, height / 1.5]);
+            .translate([width / 2, height / 1.5])
+            .center([0, 0]);
 
         const path = d3.geoPath().projection(projection);
 
-        // Zoom behavior
+        // Enable infinite horizontal wrapping
+        let currentTransform = d3.zoomIdentity;
+
+        // Zoom behavior with horizontal wrapping
         const zoom = d3.zoom()
             .scaleExtent([1, 8])
             .on("zoom", (event) => {
-                g.attr("transform", event.transform);
+                currentTransform = event.transform;
                 currentZoom = event.transform.k;
+                
+                // Calculate wrapped x position for infinite horizontal scroll
+                const worldWidth = width * currentZoom;
+                let wrappedX = ((event.transform.x % worldWidth) + worldWidth) % worldWidth;
+                
+                // If we've scrolled past the edge, wrap around
+                if (Math.abs(event.transform.x - wrappedX) > worldWidth / 2) {
+                    wrappedX = event.transform.x;
+                }
+                
+                g.attr("transform", `translate(${event.transform.x},${event.transform.y}) scale(${currentZoom})`);
                 
                 // Adjust stroke width based on zoom
                 g.selectAll(".country")
@@ -657,24 +672,33 @@
                 // Remove loading indicator
                 d3.select(".loading").remove();
 
-                // Draw countries
-                g.selectAll(".country")
-                    .data(countries.features)
-                    .enter()
-                    .append("path")
-                    .attr("class", "country")
-                    .attr("d", path)
-                    .each(function(d) {
-                        // Add country name to properties
-                        const id = d.id;
-                        const countryName = world.objects.countries.geometries
-                            .find(g => g.id === id)?.properties?.name || "Unknown";
-                        d.properties.name = countryName;
-                    })
-                    .on("click", function(event, d) {
-                        event.stopPropagation();
-                        handleCountryInteraction(event, d);
-                    });
+                // Function to render countries at a given x offset for wrapping
+                function renderCountries(xOffset = 0) {
+                    const group = g.append("g").attr("transform", `translate(${xOffset}, 0)`);
+                    
+                    group.selectAll(".country")
+                        .data(countries.features)
+                        .enter()
+                        .append("path")
+                        .attr("class", "country")
+                        .attr("d", path)
+                        .each(function(d) {
+                            // Add country name to properties
+                            const id = d.id;
+                            const countryName = world.objects.countries.geometries
+                                .find(g => g.id === id)?.properties?.name || "Unknown";
+                            d.properties.name = countryName;
+                        })
+                        .on("click", function(event, d) {
+                            event.stopPropagation();
+                            handleCountryInteraction(event, d);
+                        });
+                }
+
+                // Render the main map and duplicates for wrapping effect
+                renderCountries(-width);  // Left duplicate
+                renderCountries(0);       // Main map
+                renderCountries(width);   // Right duplicate
 
                 // Click outside to close
                 svg.on("click", () => {
