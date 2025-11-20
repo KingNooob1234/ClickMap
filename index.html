@@ -420,15 +420,44 @@
         // Enable infinite horizontal wrapping
         let currentTransform = d3.zoomIdentity;
 
-        // Zoom behavior - simple implementation without wrapping logic
-        // The multiple rendered maps handle the wrapping visually
+        // Store map width for wrapping calculations
+        let actualMapWidth = 0;
+
+        // Zoom behavior with seamless wrapping
         const zoom = d3.zoom()
             .scaleExtent([1, 8])
             .on("zoom", (event) => {
                 currentTransform = event.transform;
                 currentZoom = event.transform.k;
                 
+                // Apply transform
                 g.attr("transform", event.transform);
+                
+                // Check if we've scrolled too far and need to wrap
+                if (actualMapWidth > 0) {
+                    const scaledMapWidth = actualMapWidth * currentZoom;
+                    const threshold = scaledMapWidth * 0.8; // Wrap before fully off-screen
+                    
+                    // If scrolled too far right, teleport back
+                    if (event.transform.x < -threshold) {
+                        const newX = event.transform.x + scaledMapWidth;
+                        const newTransform = d3.zoomIdentity
+                            .translate(newX, event.transform.y)
+                            .scale(currentZoom);
+                        svg.call(zoom.transform, newTransform);
+                        return;
+                    }
+                    
+                    // If scrolled too far left, teleport back
+                    if (event.transform.x > threshold) {
+                        const newX = event.transform.x - scaledMapWidth;
+                        const newTransform = d3.zoomIdentity
+                            .translate(newX, event.transform.y)
+                            .scale(currentZoom);
+                        svg.call(zoom.transform, newTransform);
+                        return;
+                    }
+                }
                 
                 // Adjust stroke width based on zoom
                 g.selectAll(".country")
@@ -668,11 +697,12 @@
                 const leftBound = projection([-180, 0])[0];
                 const rightBound = projection([180, 0])[0];
                 const mapWidth = rightBound - leftBound;
+                actualMapWidth = mapWidth; // Store for zoom handler
 
-                // Draw latitude lines for multiple instances
-                for (let i = -3; i <= 3; i++) {
-                    drawLatitudeLines(g, i * mapWidth);
-                }
+                // Draw latitude lines for 3 instances (left, center, right)
+                drawLatitudeLines(g, -mapWidth);
+                drawLatitudeLines(g, 0);
+                drawLatitudeLines(g, mapWidth);
 
                 // Function to render countries at a given x offset for wrapping
                 function renderCountries(xOffset = 0) {
@@ -697,10 +727,10 @@
                         });
                 }
 
-                // Render multiple copies of the map for seamless wrapping
-                for (let i = -3; i <= 3; i++) {
-                    renderCountries(i * mapWidth);
-                }
+                // Render 3 copies: left, center, right
+                renderCountries(-mapWidth);
+                renderCountries(0);
+                renderCountries(mapWidth);
 
                 // Click outside to close
                 svg.on("click", () => {
