@@ -6,7 +6,7 @@ An interactive, single-page world map application with real-time weather, local 
 
 Open the hosted demo here:
 
-https://taynazdev.github.io/GeoMapLink/
+https://kingnooob1234.github.io/ClickMap/
 
 ## Features
 
